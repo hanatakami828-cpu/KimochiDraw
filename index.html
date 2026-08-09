@@ -18,17 +18,21 @@
 
       box-sizing: border-box;
 
+      -webkit-tap-highlight-color: transparent;
+
     }
 
     body {
 
       margin: 0;
 
-      background: #eeeeee;
-
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 
+      background: #ececec;
+
       overflow: hidden;
+
+      color: #222;
 
     }
 
@@ -42,9 +46,11 @@
 
       align-items: center;
 
-      padding: 0 20px;
+      justify-content: space-between;
 
-      border-bottom: 1px solid #dddddd;
+      padding: 0 16px;
+
+      border-bottom: 1px solid #ddd;
 
     }
 
@@ -56,9 +62,71 @@
 
     }
 
-    #workspace {
+    .topButtons {
+
+      display: flex;
+
+      gap: 8px;
+
+    }
+
+    button {
+
+      border: none;
+
+      background: white;
+
+      border-radius: 10px;
+
+      padding: 9px 12px;
+
+      box-shadow: 0 1px 5px rgba(0,0,0,.15);
+
+      font-size: 15px;
+
+    }
+
+    button.active {
+
+      background: #222;
+
+      color: white;
+
+    }
+
+    #main {
 
       height: calc(100vh - 60px);
+
+      display: grid;
+
+      grid-template-columns: 92px 1fr 220px;
+
+    }
+
+    #tools {
+
+      background: #f8f8f8;
+
+      border-right: 1px solid #ddd;
+
+      padding: 10px;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 10px;
+
+    }
+
+    .toolButton {
+
+      min-height: 58px;
+
+    }
+
+    #workspace {
 
       display: flex;
 
@@ -66,19 +134,143 @@
 
       align-items: center;
 
+      overflow: hidden;
+
+      padding: 20px;
+
+    }
+
+    #canvasWrap {
+
+      width: min(80vw, 1000px);
+
+      aspect-ratio: 4 / 3;
+
+      background: white;
+
+      position: relative;
+
+      box-shadow: 0 6px 24px rgba(0,0,0,.18);
+
+      touch-action: none;
+
     }
 
     canvas {
 
-      background: white;
+      position: absolute;
 
-      width: 80vw;
+      inset: 0;
 
-      height: 70vh;
+      width: 100%;
 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      height: 100%;
 
       touch-action: none;
+
+    }
+
+    #panel {
+
+      background: #f8f8f8;
+
+      border-left: 1px solid #ddd;
+
+      padding: 12px;
+
+      overflow-y: auto;
+
+    }
+
+    .box {
+
+      background: white;
+
+      border-radius: 14px;
+
+      padding: 12px;
+
+      margin-bottom: 12px;
+
+    }
+
+    .box h3 {
+
+      margin: 0 0 10px;
+
+      font-size: 14px;
+
+    }
+
+    input[type="range"] {
+
+      width: 100%;
+
+    }
+
+    #colorPicker {
+
+      width: 100%;
+
+      height: 44px;
+
+      border: 0;
+
+      background: none;
+
+    }
+
+    .layer {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 7px;
+
+      background: #eee;
+
+      padding: 8px;
+
+      border-radius: 10px;
+
+      margin-top: 7px;
+
+    }
+
+    .layer.active {
+
+      outline: 2px solid #222;
+
+    }
+
+    .layerName {
+
+      flex: 1;
+
+      font-size: 13px;
+
+    }
+
+    .small {
+
+      padding: 5px 7px;
+
+      font-size: 12px;
+
+      box-shadow: none;
+
+      background: #ddd;
+
+    }
+
+    @media (max-width: 900px) {
+
+      #main {
+
+        grid-template-columns: 78px 1fr 180px;
+
+      }
 
     }
 
@@ -92,93 +284,763 @@
 
   <h1>KimochiDraw 🎨</h1>
 
+  <div class="topButtons">
+
+    <button id="undoBtn">↶</button>
+
+    <button id="redoBtn">↷</button>
+
+    <button id="saveBtn">保存</button>
+
+  </div>
+
 </header>
 
-<div id="workspace">
+<div id="main">
 
-  <canvas id="canvas"></canvas>
+  <div id="tools">
+
+    <button class="toolButton active" data-tool="brush">✏️<br>ペン</button>
+
+    <button class="toolButton" data-tool="eraser">🧽<br>消しゴム</button>
+
+    <button class="toolButton" data-tool="eyedropper">💧<br>スポイト</button>
+
+    <button id="clearBtn" class="toolButton">🗑️<br>全消去</button>
+
+  </div>
+
+  <div id="workspace">
+
+    <div id="canvasWrap"></div>
+
+  </div>
+
+  <div id="panel">
+
+    <div class="box">
+
+      <h3>カラー</h3>
+
+      <input type="color" id="colorPicker" value="#222222">
+
+    </div>
+
+    <div class="box">
+
+      <h3>太さ：<span id="sizeText">6</span>px</h3>
+
+      <input type="range" id="sizeSlider" min="1" max="60" value="6">
+
+    </div>
+
+    <div class="box">
+
+      <h3>透明度：<span id="opacityText">100</span>%</h3>
+
+      <input type="range" id="opacitySlider" min="10" max="100" value="100">
+
+    </div>
+
+    <div class="box">
+
+      <div style="display:flex;justify-content:space-between;align-items:center">
+
+        <h3 style="margin:0">レイヤー</h3>
+
+        <button id="addLayerBtn" class="small">＋</button>
+
+      </div>
+
+      <div id="layersList"></div>
+
+    </div>
+
+  </div>
 
 </div>
 
 <script>
 
-const canvas = document.getElementById("canvas");
+const WIDTH = 1200;
 
-const ctx = canvas.getContext("2d");
+const HEIGHT = 900;
 
-function resizeCanvas() {
+const canvasWrap = document.getElementById("canvasWrap");
 
-  const rect = canvas.getBoundingClientRect();
+const layersList = document.getElementById("layersList");
 
-  canvas.width = rect.width * devicePixelRatio;
+const colorPicker = document.getElementById("colorPicker");
 
-  canvas.height = rect.height * devicePixelRatio;
+const sizeSlider = document.getElementById("sizeSlider");
 
-  ctx.scale(devicePixelRatio, devicePixelRatio);
+const opacitySlider = document.getElementById("opacitySlider");
 
-  ctx.lineCap = "round";
+const sizeText = document.getElementById("sizeText");
 
-  ctx.lineJoin = "round";
+const opacityText = document.getElementById("opacityText");
 
-}
+let tool = "brush";
 
-resizeCanvas();
+let color = "#222222";
+
+let size = 6;
+
+let opacity = 1;
 
 let drawing = false;
 
-function position(event) {
+let lastPoint = null;
 
-  const rect = canvas.getBoundingClientRect();
+let layers = [];
+
+let activeLayerId = null;
+
+let undoStack = [];
+
+let redoStack = [];
+
+function newId() {
+
+  return Date.now().toString() + Math.random();
+
+}
+
+function createLayer() {
+
+  const id = newId();
+
+  const canvas = document.createElement("canvas");
+
+  canvas.width = WIDTH;
+
+  canvas.height = HEIGHT;
+
+  const layer = {
+
+    id,
+
+    canvas,
+
+    visible: true,
+
+    name: "レイヤー " + (layers.length + 1)
+
+  };
+
+  canvasWrap.appendChild(canvas);
+
+  layers.push(layer);
+
+  setActiveLayer(id);
+
+  renderLayers();
+
+}
+
+function setActiveLayer(id) {
+
+  activeLayerId = id;
+
+  layers.forEach((layer, index) => {
+
+    layer.canvas.style.zIndex = index + 1;
+
+    layer.canvas.style.pointerEvents =
+
+      layer.id === id ? "auto" : "none";
+
+  });
+
+  renderLayers();
+
+}
+
+function getActiveLayer() {
+
+  return layers.find(l => l.id === activeLayerId);
+
+}
+
+function renderLayers() {
+
+  layersList.innerHTML = "";
+
+  [...layers].reverse().forEach(layer => {
+
+    const row = document.createElement("div");
+
+    row.className =
+
+      "layer" +
+
+      (layer.id === activeLayerId ? " active" : "");
+
+    row.innerHTML = `
+
+      <button class="small visibility">
+
+        ${layer.visible ? "👁️" : "🚫"}
+
+      </button>
+
+      <div class="layerName">
+
+        ${layer.name}
+
+      </div>
+
+      <button class="small delete">×</button>
+
+    `;
+
+    row.onclick = e => {
+
+      if (!e.target.closest("button")) {
+
+        setActiveLayer(layer.id);
+
+      }
+
+    };
+
+    row.querySelector(".visibility").onclick = e => {
+
+      e.stopPropagation();
+
+      layer.visible = !layer.visible;
+
+      layer.canvas.style.display =
+
+        layer.visible ? "block" : "none";
+
+      renderLayers();
+
+    };
+
+    row.querySelector(".delete").onclick = e => {
+
+      e.stopPropagation();
+
+      if (layers.length <= 1) {
+
+        alert("最後のレイヤーは削除できません");
+
+        return;
+
+      }
+
+      saveHistory();
+
+      const index = layers.indexOf(layer);
+
+      layer.canvas.remove();
+
+      layers.splice(index, 1);
+
+      setActiveLayer(
+
+        layers[Math.max(0, index - 1)].id
+
+      );
+
+    };
+
+    layersList.appendChild(row);
+
+  });
+
+}
+
+function pointerPosition(event) {
+
+  const rect = canvasWrap.getBoundingClientRect();
 
   return {
 
-    x: event.clientX - rect.left,
+    x: (event.clientX - rect.left) * WIDTH / rect.width,
 
-    y: event.clientY - rect.top
+    y: (event.clientY - rect.top) * HEIGHT / rect.height
 
   };
 
 }
 
-canvas.addEventListener("pointerdown", event => {
+function beginDrawing(event) {
+
+  if (tool === "eyedropper") {
+
+    pickColor(event);
+
+    return;
+
+  }
+
+  event.preventDefault();
+
+  saveHistory();
 
   drawing = true;
 
-  const p = position(event);
+  lastPoint = pointerPosition(event);
 
-  ctx.beginPath();
+  const layer = getActiveLayer();
 
-  ctx.moveTo(p.x, p.y);
+  layer.canvas.setPointerCapture?.(event.pointerId);
 
-});
+}
 
-canvas.addEventListener("pointermove", event => {
+function draw(event) {
 
   if (!drawing) return;
 
-  const p = position(event);
+  event.preventDefault();
 
-  ctx.lineWidth = 5;
+  const point = pointerPosition(event);
 
-  ctx.strokeStyle = "#222222";
+  const layer = getActiveLayer();
 
-  ctx.lineTo(p.x, p.y);
+  const ctx = layer.canvas.getContext("2d");
+
+  ctx.lineCap = "round";
+
+  ctx.lineJoin = "round";
+
+  ctx.globalAlpha = opacity;
+
+  if (tool === "eraser") {
+
+    ctx.globalCompositeOperation = "destination-out";
+
+  } else {
+
+    ctx.globalCompositeOperation = "source-over";
+
+    ctx.strokeStyle = color;
+
+  }
+
+  let pressure = 0.6;
+
+  if (event.pointerType === "pen" && event.pressure > 0) {
+
+    pressure = event.pressure;
+
+  }
+
+  ctx.lineWidth =
+
+    Math.max(1, size * (0.5 + pressure));
+
+  ctx.beginPath();
+
+  ctx.moveTo(lastPoint.x, lastPoint.y);
+
+  ctx.lineTo(point.x, point.y);
 
   ctx.stroke();
 
-});
+  lastPoint = point;
 
-canvas.addEventListener("pointerup", () => {
+}
 
-  drawing = false;
+function endDrawing(event) {
 
-});
-
-canvas.addEventListener("pointercancel", () => {
+  if (!drawing) return;
 
   drawing = false;
 
-});
+  lastPoint = null;
+
+  getActiveLayer()
+
+    .canvas
+
+    .releasePointerCapture?.(event.pointerId);
+
+}
+
+function pickColor(event) {
+
+  const point = pointerPosition(event);
+
+  const merged = mergeLayers();
+
+  const data = merged
+
+    .getContext("2d")
+
+    .getImageData(
+
+      Math.floor(point.x),
+
+      Math.floor(point.y),
+
+      1,
+
+      1
+
+    ).data;
+
+  if (data[3] === 0) return;
+
+  color =
+
+    "#" +
+
+    [data[0], data[1], data[2]]
+
+    .map(v => v.toString(16).padStart(2, "0"))
+
+    .join("");
+
+  colorPicker.value = color;
+
+  setTool("brush");
+
+}
+
+function setTool(nextTool) {
+
+  tool = nextTool;
+
+  document
+
+    .querySelectorAll("[data-tool]")
+
+    .forEach(button => {
+
+      button.classList.toggle(
+
+        "active",
+
+        button.dataset.tool === tool
+
+      );
+
+    });
+
+}
+
+function saveHistory() {
+
+  const state = layers.map(layer => ({
+
+    id: layer.id,
+
+    name: layer.name,
+
+    visible: layer.visible,
+
+    image: layer.canvas.toDataURL()
+
+  }));
+
+  undoStack.push({
+
+    activeLayerId,
+
+    layers: state
+
+  });
+
+  if (undoStack.length > 20) {
+
+    undoStack.shift();
+
+  }
+
+  redoStack = [];
+
+}
+
+function restoreState(state) {
+
+  layers.forEach(layer => layer.canvas.remove());
+
+  layers = [];
+
+  state.layers.forEach(saved => {
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = WIDTH;
+
+    canvas.height = HEIGHT;
+
+    const layer = {
+
+      id: saved.id,
+
+      canvas,
+
+      visible: saved.visible,
+
+      name: saved.name
+
+    };
+
+    canvasWrap.appendChild(canvas);
+
+    canvas.style.display =
+
+      saved.visible ? "block" : "none";
+
+    const img = new Image();
+
+    img.onload = () => {
+
+      canvas
+
+        .getContext("2d")
+
+        .drawImage(img, 0, 0);
+
+    };
+
+    img.src = saved.image;
+
+    layers.push(layer);
+
+  });
+
+  setActiveLayer(state.activeLayerId);
+
+}
+
+function undo() {
+
+  if (undoStack.length === 0) return;
+
+  redoStack.push(currentState());
+
+  const previous = undoStack.pop();
+
+  restoreState(previous);
+
+}
+
+function redo() {
+
+  if (redoStack.length === 0) return;
+
+  undoStack.push(currentState());
+
+  const next = redoStack.pop();
+
+  restoreState(next);
+
+}
+
+function currentState() {
+
+  return {
+
+    activeLayerId,
+
+    layers: layers.map(layer => ({
+
+      id: layer.id,
+
+      name: layer.name,
+
+      visible: layer.visible,
+
+      image: layer.canvas.toDataURL()
+
+    }))
+
+  };
+
+}
+
+function mergeLayers() {
+
+  const output = document.createElement("canvas");
+
+  output.width = WIDTH;
+
+  output.height = HEIGHT;
+
+  const ctx = output.getContext("2d");
+
+  ctx.fillStyle = "white";
+
+  ctx.fillRect(
+
+    0,
+
+    0,
+
+    WIDTH,
+
+    HEIGHT
+
+  );
+
+  layers.forEach(layer => {
+
+    if (layer.visible) {
+
+      ctx.drawImage(layer.canvas, 0, 0);
+
+    }
+
+  });
+
+  return output;
+
+}
+
+function saveImage() {
+
+  const merged = mergeLayers();
+
+  const link = document.createElement("a");
+
+  link.download = "KimochiDraw.png";
+
+  link.href = merged.toDataURL("image/png");
+
+  link.click();
+
+}
+
+canvasWrap.addEventListener(
+
+  "pointerdown",
+
+  beginDrawing
+
+);
+
+canvasWrap.addEventListener(
+
+  "pointermove",
+
+  draw
+
+);
+
+canvasWrap.addEventListener(
+
+  "pointerup",
+
+  endDrawing
+
+);
+
+canvasWrap.addEventListener(
+
+  "pointercancel",
+
+  endDrawing
+
+);
+
+document
+
+  .querySelectorAll("[data-tool]")
+
+  .forEach(button => {
+
+    button.onclick = () => {
+
+      setTool(button.dataset.tool);
+
+    };
+
+  });
+
+colorPicker.oninput = () => {
+
+  color = colorPicker.value;
+
+  setTool("brush");
+
+};
+
+sizeSlider.oninput = () => {
+
+  size = Number(sizeSlider.value);
+
+  sizeText.textContent = size;
+
+};
+
+opacitySlider.oninput = () => {
+
+  opacity =
+
+    Number(opacitySlider.value) / 100;
+
+  opacityText.textContent =
+
+    opacitySlider.value;
+
+};
+
+document.getElementById(
+
+  "undoBtn"
+
+).onclick = undo;
+
+document.getElementById(
+
+  "redoBtn"
+
+).onclick = redo;
+
+document.getElementById(
+
+  "saveBtn"
+
+).onclick = saveImage;
+
+document.getElementById(
+
+  "addLayerBtn"
+
+).onclick = () => {
+
+  saveHistory();
+
+  createLayer();
+
+};
+
+document.getElementById(
+
+  "clearBtn"
+
+).onclick = () => {
+
+  saveHistory();
+
+  const layer = getActiveLayer();
+
+  layer
+
+    .canvas
+
+    .getContext("2d")
+
+    .clearRect(
+
+      0,
+
+      0,
+
+      WIDTH,
+
+      HEIGHT
+
+    );
+
+};
+
+createLayer();
 
 </script>
 
