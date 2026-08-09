@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+  <title>KimochiDraw</title>
+
+  <style>
+
+    * {
+
+      box-sizing: border-box;
+
+    }
+
+    body {
+
+      margin: 0;
+
+      background: #eeeeee;
+
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+
+      overflow: hidden;
+
+    }
+
+    header {
+
+      height: 60px;
+
+      background: white;
+
+      display: flex;
+
+      align-items: center;
+
+      padding: 0 20px;
+
+      border-bottom: 1px solid #dddddd;
+
+    }
+
+    h1 {
+
+      margin: 0;
+
+      font-size: 22px;
+
+    }
+
+    #workspace {
+
+      height: calc(100vh - 60px);
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+    }
+
+    canvas {
+
+      background: white;
+
+      width: 80vw;
+
+      height: 70vh;
+
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+
+      touch-action: none;
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<header>
+
+  <h1>KimochiDraw 🎨</h1>
+
+</header>
+
+<div id="workspace">
+
+  <canvas id="canvas"></canvas>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("canvas");
+
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas() {
+
+  const rect = canvas.getBoundingClientRect();
+
+  canvas.width = rect.width * devicePixelRatio;
+
+  canvas.height = rect.height * devicePixelRatio;
+
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+
+  ctx.lineCap = "round";
+
+  ctx.lineJoin = "round";
+
+}
+
+resizeCanvas();
+
+let drawing = false;
+
+function position(event) {
+
+  const rect = canvas.getBoundingClientRect();
+
+  return {
+
+    x: event.clientX - rect.left,
+
+    y: event.clientY - rect.top
+
+  };
+
+}
+
+canvas.addEventListener("pointerdown", event => {
+
+  drawing = true;
+
+  const p = position(event);
+
+  ctx.beginPath();
+
+  ctx.moveTo(p.x, p.y);
+
+});
+
+canvas.addEventListener("pointermove", event => {
+
+  if (!drawing) return;
+
+  const p = position(event);
+
+  ctx.lineWidth = 5;
+
+  ctx.strokeStyle = "#222222";
+
+  ctx.lineTo(p.x, p.y);
+
+  ctx.stroke();
+
+});
+
+canvas.addEventListener("pointerup", () => {
+
+  drawing = false;
+
+});
+
+canvas.addEventListener("pointercancel", () => {
+
+  drawing = false;
+
+});
+
+</script>
+
+</body>
+
+</html>
